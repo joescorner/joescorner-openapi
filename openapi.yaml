@@ -1,0 +1,457 @@
+openapi: 3.1.0
+info:
+  title: Joe's Corner API
+  version: 1.0.0
+  description: The Joe's Corner REST API. Please see https://github.com/joescorner/joescorner-openapi
+    for more details.
+paths:
+  /v1/feeds:
+    get:
+      summary: List feeds
+      description: Returns a paginated list of public feeds with their sources and
+        preferences.
+      operationId: public_list_feeds
+      parameters:
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: sort
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/FeedSort'
+          default: popular
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFeedListResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/feeds/{username}/{feed_slug}:
+    get:
+      summary: Get a feed
+      description: Returns a single public feed with its sources and preferences.
+      operationId: public_get_feed
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Username
+      - name: feed_slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Feed Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFeedResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/feeds/{username}/{feed_slug}/posts:
+    get:
+      summary: List feed posts
+      description: Returns a paginated list of posts for a public feed, ordered by
+        most recent first.
+      operationId: public_list_feed_posts
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Username
+      - name: feed_slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Feed Slug
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 10
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFeedPostsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/feeds/{username}/{feed_slug}/posts/{post_id}:
+    get:
+      summary: Get a post
+      description: Returns a single post by ID within a public feed.
+      operationId: public_get_post
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Username
+      - name: feed_slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Feed Slug
+      - name: post_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Post Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFeedPostResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    FeedSort:
+      type: string
+      enum:
+      - popular
+      - alphabetical
+      - newest
+      title: FeedSort
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    PublicFeedListResponse:
+      properties:
+        info:
+          type: string
+          title: Info
+        items:
+          items:
+            $ref: '#/components/schemas/PublicFeedOut'
+          type: array
+          title: Items
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+      type: object
+      required:
+      - items
+      title: PublicFeedListResponse
+    PublicFeedOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        name:
+          type: string
+          title: Name
+        slug:
+          type: string
+          title: Slug
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        owner:
+          type: string
+          title: Owner
+        feed_url:
+          type: string
+          title: Feed Url
+        sources:
+          items:
+            $ref: '#/components/schemas/PublicSourceOut'
+          type: array
+          title: Sources
+        preferences:
+          items:
+            $ref: '#/components/schemas/PublicPreferenceOut'
+          type: array
+          title: Preferences
+        follow_count:
+          type: integer
+          title: Follow Count
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor
+      type: object
+      required:
+      - id
+      - name
+      - slug
+      - description
+      - owner
+      - feed_url
+      - sources
+      - preferences
+      - follow_count
+      - created_at
+      title: PublicFeedOut
+    PublicFeedPostResponse:
+      properties:
+        info:
+          type: string
+          title: Info
+        feed:
+          $ref: '#/components/schemas/PublicFeedRef'
+        post:
+          $ref: '#/components/schemas/PublicPostOut'
+      type: object
+      required:
+      - feed
+      - post
+      title: PublicFeedPostResponse
+    PublicFeedPostsResponse:
+      properties:
+        info:
+          type: string
+          title: Info
+        items:
+          items:
+            $ref: '#/components/schemas/PublicPostOut'
+          type: array
+          title: Items
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+        feed:
+          $ref: '#/components/schemas/PublicFeedRef'
+      type: object
+      required:
+      - items
+      - feed
+      title: PublicFeedPostsResponse
+    PublicFeedRef:
+      properties:
+        name:
+          type: string
+          title: Name
+        slug:
+          type: string
+          title: Slug
+        owner:
+          type: string
+          title: Owner
+        url:
+          type: string
+          title: Url
+      type: object
+      required:
+      - name
+      - slug
+      - owner
+      - url
+      title: PublicFeedRef
+    PublicFeedResponse:
+      properties:
+        info:
+          type: string
+          title: Info
+        feed:
+          $ref: '#/components/schemas/PublicFeedOut'
+      type: object
+      required:
+      - feed
+      title: PublicFeedResponse
+    PublicPostImageOut:
+      properties:
+        url:
+          type: string
+          title: Url
+      type: object
+      required:
+      - url
+      title: PublicPostImageOut
+    PublicPostOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        title:
+          type: string
+          title: Title
+        content:
+          type: string
+          title: Content
+        url:
+          type: string
+          title: Url
+        post_url:
+          type: string
+          title: Post Url
+        posted_at:
+          type: string
+          format: date-time
+          title: Posted At
+        source_published_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source Published At
+        images:
+          items:
+            $ref: '#/components/schemas/PublicPostImageOut'
+          type: array
+          title: Images
+        reactions:
+          items:
+            $ref: '#/components/schemas/PublicReactionOut'
+          type: array
+          title: Reactions
+        view_count:
+          type: integer
+          title: View Count
+        cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor
+      type: object
+      required:
+      - id
+      - title
+      - content
+      - url
+      - post_url
+      - posted_at
+      - source_published_at
+      - images
+      - reactions
+      - view_count
+      title: PublicPostOut
+    PublicPreferenceOut:
+      properties:
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - content
+      title: PublicPreferenceOut
+    PublicReactionOut:
+      properties:
+        emoji:
+          type: string
+          title: Emoji
+        count:
+          type: integer
+          title: Count
+      type: object
+      required:
+      - emoji
+      - count
+      title: PublicReactionOut
+    PublicSourceOut:
+      properties:
+        url:
+          type: string
+          title: Url
+      type: object
+      required:
+      - url
+      title: PublicSourceOut
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+servers:
+- url: https://api.joescorner.ai

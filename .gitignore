@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Except these files
+!.gitignore
+!LICENSE
+!README.md
+!openapi.json
+!openapi.yaml
+!CONTRIBUTING.md
+!CHANGELOG.md
