@@ -13,10 +13,15 @@ The specification is available in [`openapi.json`](openapi.json) and [`openapi.y
 
 ## Endpoints
 
-- `GET /v1/feeds` -- List public feeds (paginated, sortable)
-- `GET /v1/feeds/{username}/{feed_slug}` -- Get a single feed with sources and preferences
-- `GET /v1/feeds/{username}/{feed_slug}/posts` -- List posts for a feed (paginated)
-- `GET /v1/feeds/{username}/{feed_slug}/posts/{post_id}` -- Get a single post
+- `GET /v1/feeds` - List public feeds (paginated, sortable)
+- `GET /v1/feeds/{username}/{feed_slug}` - Get a single feed with sources and preferences
+- `GET /v1/feeds/{username}/{feed_slug}/posts` - List posts for a feed (paginated)
+- `GET /v1/feeds/{username}/{feed_slug}/posts/{post_id}` - Get a single post
+
+
+## Client libraries
+
+- [joescorner-python](https://github.com/joescorner/joescorner-python) - Official Python SDK ([PyPI](https://pypi.org/project/joescorner/))
 
 
 ## Quick start
